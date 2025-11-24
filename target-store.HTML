@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TARGETstore 🛒 - FRAMES , STICKERS</title>
+  <style>
+    :root{
+      --accent:#ff5722;
+      --bg:#fff;
+      --muted:#666;
+      --card:#fafafa;
+      --header:#1a1a1a;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Poppins,Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#111;line-height:1.35}
+    header{background:var(--header);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    header h1{margin:0;font-size:1.4rem}
+    nav{display:flex;gap:10px;flex-wrap:wrap}
+    nav a{color:#fff;text-decoration:none;cursor:pointer;padding:6px 10px;border-radius:6px}
+    .hero{background: linear-gradient(135deg,var(--accent),#ff7043); color:white; text-align:center; padding:50px 16px;}
+    .hero h2{font-size:2rem;margin:0 0 8px}
+    .hero p{margin:0 0 14px;color:#ffe9dd}
+    .btn{background:#fff;color:var(--accent);padding:10px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:700;transition:all .18s}
+    .btn:hover{transform:translateY(-2px);opacity:.95}
+    .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;padding:20px;background:#fff}
+    .product{background:var(--card);border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.06);text-align:center;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:220px}
+    .product img{width:100%;height:auto-fit;object-fit:cover;border-radius:8px}
+    .product h3{font-size:1rem;margin:6px 0 0}
+    .product p{color:var(--muted);margin:4px 0;font-size:.95rem}
+    .product .actions{margin-top:auto;display:flex;gap:8px;justify-content:center}
+    .product .actions button{flex:1;padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
+    .product .actions .view{background:#fff;border:1px solid #eee}
+    .product .actions .add{background:var(--accent);color:#fff}
+
+    /* pages */
+    .page{display:none;padding:18px}
+    .page.active{display:block}
+
+    /* cart */
+    .cart-table{width:100%;border-collapse:collapse;margin-bottom:12px}
+    .cart-table th,.cart-table td{padding:10px 8px;border-bottom:1px solid #eee;text-align:left}
+    .qty-controls{display:flex;gap:6px;align-items:center}
+    .small{font-size:.9rem;color:var(--muted)}
+
+    /* checkout */
+    .checkout-grid{display:grid;grid-template-columns:1fr 320px;gap:16px}
+    .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+    label{display:block;margin-top:8px;font-weight:600}
+    input,textarea,select{width:100%;padding:8px;margin-top:6px;border-radius:8px;border:1px solid #ddd;box-sizing:border-box}
+    .payment-methods{display:flex;gap:8px;margin-top:8px}
+    .pm{padding:8px 10px;border-radius:8px;border:1px solid #ddd;cursor:pointer}
+    .pm.selected{border-color:var(--accent);box-shadow:0 6px 18px rgba(255,87,34,0.08)}
+
+    /* preview page */
+    #product-preview-page .preview-wrap{max-width:1100px;margin:auto;display:flex;gap:18px;flex-wrap:wrap}
+    #product-preview-page .preview-img{flex:1;min-width:280px}
+    #product-preview-page .preview-img img{width:100%;height:auto-fit;object-fit:cover;border-radius:10px}
+    #product-preview-page .preview-info{flex:1;min-width:280px;display:flex;flex-direction:column;gap:10px}
+    .price{color:var(--accent);font-size:1.5rem;font-weight:700}
+    .badges{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .badge{background:#fff;padding:6px 8px;border-radius:6px;border:1px solid #eee;font-weight:600}
+
+    footer{background:var(--header);color:#ccc;text-align:center;padding:22px;margin-top:30px;font-size:.9rem}
+
+    /* responsive */
+    @media (max-width:900px){.checkout-grid{grid-template-columns:1fr}.preview-img img{height:auto-fit}.product img{height:auto-fit}}
+    @media (max-width:600px){
+      header{padding:12px}
+      .hero{padding:28px}
+      .hero h2{font-size:1.5rem}
+      .product{min-height:200px}
+      #product-preview-page .preview-wrap{padding:8px}
+      #product-preview-page .preview-img img{height:auto-fit}
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>TARGETstore🛒</h1>
+    <nav>
+      <a onclick="showSection('home')">Home</a>
+      <a onclick="showSection('shop')">Shop</a>
+      <a onclick="showSection('contact')">Contact</a>
+      <a onclick="showSection('cart')">Cart 🛒 (<span id="cart-count">0</span>)</a>
+    </nav>
+  </header>
+
+  <!-- HOME -->
+  <section class="hero page active" id="home-section">
+    <h2>Welcome to TARGETstore</h2>
+    <p>High-quality frames, stickers and decor — made for every room.</p>
+    <button class="btn" onclick="scrollToProducts()">Shop Now</button>
+  </section>
+
+  <!-- SHOP -->
+  <section class="products page" id="shop-section"></section>
+
+  <!-- PRODUCT PREVIEW (Flipkart-style) -->
+  <section id="product-preview-page" class="page">
+    <div class="card preview-wrap">
+      <div class="preview-img">
+        <img id="preview-img" src="" alt="Product">
+      </div>
+      <div class="preview-info">
+        <div class="badges">
+          <div class="badge" id="preview-brand">Brand</div>
+          <div class="badge" id="preview-type">Type</div>
+        </div>
+        <h2 id="preview-title">Product title</h2>
+        <div class="price">₹ <span id="preview-price">0</span></div>
+        <div class="small" id="preview-short">Short description / highlights</div>
+
+        <div style="margin-top:6px">
+          <strong>Description</strong>
+          <div class="small" id="preview-desc" style="margin-top:6px">Full description appears here.</div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn" onclick="addToCart(currentPreviewId)">Add to Cart</button>
+          <button class="btn" style="background:var(--accent);color:#fff" onclick="buyNow()">Buy Now</button>
+          <button onclick="showSection('shop')" style="background:#eee;border:none;padding:10px;border-radius:8px;cursor:pointer">⬅ Back</button>
+        </div>
+
+        <div class="small" style="margin-top:12px" id="preview-extra"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CART PAGE -->
+  <section id="cart-page" class="page">
+    <h2>Your Cart</h2>
+    <div class="card">
+      <table class="cart-table" id="cart-table"></table>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <div class="small">Delivery: <span id="delivery-fee">₹0</span></div>
+        <div><strong>Grand Total: ₹<span id="grand-total">0</span></strong></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn" onclick="proceedToCheckout()">Checkout</button>
+        <button class="btn" style="background:#444;color:#fff" onclick="clearCart()">Clear Cart</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHECKOUT -->
+  <section id="checkout-page" class="page">
+    <h2>Checkout</h2>
+    <div class="checkout-grid">
+      <div>
+        <div class="card">
+          <h3>Customer details</h3>
+          <label>Full name</label>
+          <input id="cust-name" placeholder="Your name" />
+
+          <label>Mobile number</label>
+          <input id="cust-mobile" placeholder="+91 9xxxxxxxxx" />
+
+          <label>Address</label>
+          <textarea id="cust-address" rows="3" placeholder="House, street, city"></textarea>
+
+          <label>PIN Code</label>
+          <input id="cust-pin" />
+
+          <h3 style="margin-top:12px">Payment method</h3>
+          <div class="payment-methods" id="pm-list">
+            <div class="pm selected" data-method="COD">Cash on Delivery (COD)</div>
+            <div class="pm" data-method="UPI">UPI</div>
+          </div>
+
+          <div id="upi-area" style="display:none;margin-top:8px">
+            <div class="small">Merchant UPI: <strong id="merchant-upi">target123@oksbi</strong></div>
+            <div style="margin-top:8px">
+              <button class="btn" id="pay-upi-btn">Pay with UPI (opens app)</button>
+            </div>
+            <div id="upi-qr" style="margin-top:8px"></div>
+            <div id="upi-confirm" style="margin-top:8px;display:none">
+              <button class="btn" id="i-paid-btn" style="background:#4CAF50">I have paid</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <button class="btn" id="place-order-btn">Place order & Send WhatsApp</button>
+          </div>
+
+          <div id="checkout-status" class="small" style="margin-top:10px"></div>
+        </div>
+      </div>
+
+      <aside>
+        <div class="card">
+          <h3>Order summary</h3>
+          <div id="summary-lines" style="max-height:320px;overflow:auto"></div>
+          <hr />
+          <div style="display:flex;justify-content:space-between"><span>Subtotal</span><strong id="sub-total">₹0</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Delivery</span><strong id="delivery-charges">₹0</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px"><span>Total</span><strong id="total-pay">₹0</strong></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact-section" class="page" style="padding:18px">
+    <div class="card">
+      <h3>Contact</h3>
+      <p class="small">WhatsApp: +91 9048658170</p>
+      <p class="small">Email: targeteditors00@gmail.com</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 TARGET | All Rights Reserved</p>
+  </footer>
+
+  <script>
+    /********* CONFIG *********/
+    const OWNER_WHATSAPP = "919048658170"; // recipient with country code
+    const MERCHANT_UPI = "yourupi@bank";    // replace with real UPI id
+    const DELIVERY_CHARGE = 0;
+
+    /********* PRODUCTS (6 items as before, with descriptions) *********/
+    const PRODUCTS = [
+      { id:'p1', title:'BMW M5 | A4 Frame', price:279, img:'https://m.media-amazon.com/images/I/71WvN6vaXkL._AC_UF894,1000_QL80_.jpg', brand:'BMW', type:'A4 Frame', short:'Classic BMW M5 print, A4 size', desc:'High quality A4 frame with BMW M5 print. Perfect for wall or desk display. Durable MDF frame with glass front.' },
+      { id:'p2', title:'JEEP | A4 Frame', price:299, img:'https://i.ibb.co/fVzSDDCW/IMG-20251104-WA0008.webp', brand:'JEEP', type:'A4 Frame', short:'Bold Jeep artwork, A4 size', desc:'Rugged Jeep themed A4 frame. Great gift for off-road fans. Smooth finish and protected glass.' },
+      { id:'p3', title:'BMW M5 | A3 Frame', price:379, img:'https://m.media-amazon.com/images/I/71WvN6vaXkL._AC_UF894,1000_QL80_.jpg', brand:'BMW', type:'A3 Frame', short:'Large BMW M5 A3 poster frame', desc:'A3 sized BMW M5 frame for larger wall spaces. High-resolution print and sturdy frame.' },
+      { id:'p4', title:'BMW M5 | A4 Frame (Matte)', price:299, img:'https://m.media-amazon.com/images/I/71WvN6vaXkL._AC_UF894,1000_QL80_.jpg', brand:'BMW', type:'A4 Frame Matte', short:'Matte finish A4 frame', desc:'Same BMW M5 design with matte finish to reduce glare. Ideal for framed collections.' },
+      { id:'p5', title:'JEEP | A4 Frame (Gloss)', price:329, img:'https://i.ibb.co/fVzSDDCW/IMG-20251104-WA0008.webp', brand:'JEEP', type:'A4 Frame Gloss', short:'Glossy finish Jeep frame', desc:'Gloss finish for vibrant colors. Perfect for modern interiors.' },
+      { id:'p6', title:'BMW M5 | A3 Frame (Premium)', price:439, img:'https://m.media-amazon.com/images/I/71WvN6vaXkL._AC_UF894,1000_QL80_.jpg', brand:'BMW', type:'A3 Frame Premium', short:'Premium A3 BMW M5 frame', desc:'Premium materials, enhanced print quality and thicker frame moulding.' }
+    ];
+
+    /********* CART using localStorage *********/
+    function loadCart(){ return JSON.parse(localStorage.getItem('ts_cart') || '{}'); }
+    function saveCart(cart){ localStorage.setItem('ts_cart', JSON.stringify(cart)); updateCartCount(); }
+
+    function updateCartCount(){
+      const cart = loadCart();
+      const count = Object.values(cart).reduce((s, it) => s + it.qty, 0);
+      document.getElementById('cart-count').innerText = count;
+    }
+
+    /********* RENDER SHOP *********/
+    function renderShop(){
+      const shop = document.getElementById('shop-section');
+      shop.innerHTML = '';
+      PRODUCTS.forEach(p=>{
+        const div = document.createElement('div');
+        div.className = 'product';
+        div.innerHTML = `
+          <img src="${p.img}" alt="${p.title}">
+          <h3>${p.title}</h3>
+          <p>₹${p.price}</p>
+          <div class="actions">
+            <button class="view" onclick="openProduct('${p.id}')">View</button>
+            <button class="add" onclick="addToCart('${p.id}')">Add</button>
+          </div>
+        `;
+        shop.appendChild(div);
+      });
+    }
+
+    /********* PRODUCT PREVIEW *********/
+    let currentPreviewId = null;
+    function openProduct(id){
+      const p = PRODUCTS.find(x => x.id===id);
+      if(!p) return;
+      currentPreviewId = id;
+      document.getElementById('preview-img').src = p.img;
+      document.getElementById('preview-title').innerText = p.title;
+      document.getElementById('preview-price').innerText = p.price;
+      document.getElementById('preview-desc').innerText = p.desc || '';
+      document.getElementById('preview-short').innerText = p.short || '';
+      document.getElementById('preview-brand').innerText = p.brand || '';
+      document.getElementById('preview-type').innerText = p.type || '';
+      document.getElementById('preview-extra').innerText = `Product code: ${p.id}`;
+      showSection('product-preview');
+    }
+    function buyNow(){
+      if(!currentPreviewId){ alert('Please select a product first.'); return; }
+      addToCart(currentPreviewId);
+      // take user to checkout
+      showSection('checkout');
+      renderSummary();
+      // smooth scroll to checkout
+      setTimeout(()=>{ document.getElementById('checkout-page').scrollIntoView({behavior:'smooth'}) },80);
+    }
+
+    /********* CART ACTIONS *********/
+    function addToCart(productId){
+      const product = PRODUCTS.find(p=>p.id===productId);
+      if(!product){ alert('Product not found'); return; }
+      const cart = loadCart();
+      if(!cart[productId]) cart[productId] = {...product, qty:0};
+      cart[productId].qty++;
+      saveCart(cart);
+      alert('Added to cart ✔');
+    }
+
+    function renderCartPage(){
+      const cart = loadCart();
+      const table = document.getElementById('cart-table');
+      table.innerHTML = '';
+      const keys = Object.keys(cart);
+      if(!keys.length){
+        table.innerHTML = '<tr><td colspan="4" class="small">Your cart is empty.</td></tr>';
+        document.getElementById('grand-total').innerText = '0';
+        document.getElementById('delivery-fee').innerText = '₹' + DELIVERY_CHARGE;
+        return;
+      }
+      let html = `<tr><th>Item</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr>`;
+      let total = 0;
+      keys.forEach(id=>{
+        const it = cart[id];
+        const sub = it.price * it.qty;
+        total += sub;
+        html += `<tr>
+          <td><strong>${it.title}</strong><div class="small">${it.id}</div></td>
+          <td>₹${it.price}</td>
+          <td>
+            <div class="qty-controls">
+              <button onclick="decreaseQty('${id}')">-</button>
+              <span id="q-${id}">${it.qty}</span>
+              <button onclick="increaseQty('${id}')">+</button>
+            </div>
+          </td>
+          <td>₹${sub}</td>
+        </tr>`;
+      });
+      table.innerHTML = html;
+      document.getElementById('grand-total').innerText = total + DELIVERY_CHARGE;
+      document.getElementById('delivery-fee').innerText = '₹' + DELIVERY_CHARGE;
+    }
+
+    function increaseQty(id){ const cart = loadCart(); cart[id].qty++; saveCart(cart); renderCartPage(); }
+    function decreaseQty(id){ const cart = loadCart(); if(cart[id].qty>1) cart[id].qty--; else delete cart[id]; saveCart(cart); renderCartPage(); }
+
+    function clearCart(){ if(confirm('Clear cart?')){ localStorage.removeItem('ts_cart'); renderCartPage(); updateCartCount(); } }
+
+    function proceedToCheckout(){ showSection('checkout'); renderSummary(); }
+
+    /********* CHECKOUT SUMMARY *********/
+    function renderSummary(){
+      const cart = loadCart();
+      const lines = document.getElementById('summary-lines');
+      lines.innerHTML = '';
+      const keys = Object.keys(cart);
+      let subtotal = 0;
+      if(!keys.length){ lines.innerHTML = '<div class="small">Cart is empty.</div>'; document.getElementById('sub-total').innerText='₹0'; document.getElementById('total-pay').innerText='₹0'; return; }
+      keys.forEach(id=>{
+        const it = cart[id];
+        const sub = it.qty * it.price;
+        subtotal += sub;
+        const el = document.createElement('div');
+        el.style.display = 'flex';
+        el.style.justifyContent = 'space-between';
+        el.style.padding = '8px 0';
+        el.innerHTML = `<div><strong>${it.title}</strong><div class="small">${it.qty} × ₹${it.price}</div></div><div>₹${sub}</div>`;
+        lines.appendChild(el);
+      });
+      document.getElementById('sub-total').innerText = '₹' + subtotal;
+      document.getElementById('delivery-charges').innerText = '₹' + DELIVERY_CHARGE;
+      document.getElementById('total-pay').innerText = '₹' + (subtotal + DELIVERY_CHARGE);
+      document.getElementById('grand-total').innerText = subtotal + DELIVERY_CHARGE;
+    }
+
+    /********* NAVIGATION *********/
+    function hideAllPages(){
+      document.getElementById('home-section').style.display='none';
+      document.getElementById('shop-section').style.display='none';
+      document.getElementById('cart-page').style.display='none';
+      document.getElementById('checkout-page').style.display='none';
+      document.getElementById('contact-section').style.display='none';
+      document.getElementById('product-preview-page').style.display='none';
+    }
+
+    function showSection(name){
+      hideAllPages();
+      if(name==='home'){ document.getElementById('home-section').style.display='block'; }
+      if(name==='shop'){ document.getElementById('shop-section').style.display='grid'; }
+      if(name==='cart'){ document.getElementById('cart-page').style.display='block'; renderCartPage(); }
+      if(name==='checkout'){ document.getElementById('checkout-page').style.display='block'; renderSummary(); }
+      if(name==='contact'){ document.getElementById('contact-section').style.display='block'; }
+      if(name==='product-preview'){ document.getElementById('product-preview-page').style.display='block'; }
+      // make sure header nav count is current
+      updateCartCount();
+    }
+
+    function scrollToProducts(){ showSection('shop'); setTimeout(()=>{ document.getElementById('shop-section').scrollIntoView({behavior:'smooth'}) },80); }
+
+    /********* PAYMENT (UPI) *********/
+    document.addEventListener('click', function(e){
+      if(e.target && e.target.classList.contains('pm')){
+        document.querySelectorAll('.pm').forEach(x=>x.classList.remove('selected'));
+        e.target.classList.add('selected');
+        const method = e.target.dataset.method;
+        document.getElementById('upi-area').style.display = method==='UPI' ? 'block' : 'none';
+        document.getElementById('merchant-upi').innerText = MERCHANT_UPI;
+      }
+    });
+
+    document.getElementById('pay-upi-btn').addEventListener('click', function(){
+      const totalText = document.getElementById('total-pay').innerText.replace('₹','').trim();
+      if(!totalText || Number(totalText) <= 0){ alert('Cart is empty or total invalid.'); return; }
+      const amount = encodeURIComponent(totalText);
+      const upiText = `upi://pay?pa=${encodeURIComponent(MERCHANT_UPI)}&pn=${encodeURIComponent('TARGETstore')}&am=${amount}&cu=INR&tn=${encodeURIComponent('Order from TARGETstore')}`;
+      const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(upiText)}`;
+      document.getElementById('upi-qr').innerHTML = `<div class="small">Scan to pay or your UPI app will open</div><div style="margin-top:6px"><img src="${qrUrl}" alt="UPI QR" style="max-width:100%"/></div>`;
+      // attempt to open UPI intent (works on mobile)
+      try{ window.location.href = upiText; }catch(e){}
+      document.getElementById('upi-confirm').style.display = 'block';
+      document.getElementById('checkout-status').innerText = 'UPI intent opened. After payment, click "I have paid".';
+    });
+
+    document.getElementById('i-paid-btn').addEventListener('click', function(){
+      sessionStorage.setItem('ts_upi_paid','true');
+      document.getElementById('checkout-status').innerText = 'Payment noted. Now click Place order to send WhatsApp bill.';
+    });
+
+    /********* PLACE ORDER -> WHATSAPP *********/
+    document.getElementById('place-order-btn').addEventListener('click', function(){
+      const name = document.getElementById('cust-name').value.trim();
+      const mobile = document.getElementById('cust-mobile').value.trim();
+      const address = document.getElementById('cust-address').value.trim();
+      const pin = document.getElementById('cust-pin').value.trim();
+      const methodEl = document.querySelector('.pm.selected');
+      const paymentMethod = methodEl ? methodEl.dataset.method : 'COD';
+
+      if(!name || !mobile || !address || !pin){
+        alert('Please fill name, mobile, address and PIN.');
+        return;
+      }
+
+      const cart = loadCart();
+      const items = Object.values(cart);
+      if(!items.length){ alert('Cart is empty. Add products.'); return; }
+
+      if(paymentMethod === 'UPI' && sessionStorage.getItem('ts_upi_paid') !== 'true'){
+        if(!confirm('You chose UPI. Have you completed payment? If not, press Cancel and complete payment first.')) return;
+      }
+
+      // Build message (URL encoded later)
+      let msg = `🧾 NEW ORDER - TARGETstore\n\n`;
+      msg += `👤 Name: ${name}\n`;
+      msg += `📞 Mobile: ${mobile}\n`;
+      msg += `📍 Address: ${address} - ${pin}\n\n`;
+      msg += `🛒 Order details:\n`;
+
+      let subtotal = 0;
+      items.forEach(it=>{
+        const line = `• ${it.title} — ${it.qty} x ₹${it.price} = ₹${it.qty * it.price}\n`;
+        subtotal += it.qty * it.price;
+        msg += line;
+      });
+
+      msg += `\nSubtotal: ₹${subtotal}\n`;
+      msg += `Delivery: ₹${DELIVERY_CHARGE}\n`;
+      msg += `Total: ₹${subtotal + DELIVERY_CHARGE}\n\n`;
+      msg += `Payment method: ${paymentMethod}\n`;
+      if(paymentMethod === 'UPI') msg += `UPI ID: ${MERCHANT_UPI}\n`;
+      msg += `\nPlease confirm and provide ETA.\n`;
+
+      // Save a local order record
+      const orders = JSON.parse(localStorage.getItem('ts_orders') || '[]');
+      orders.push({ id:'ORD'+Date.now(), name, mobile, address, pin, items, total: subtotal + DELIVERY_CHARGE, paymentMethod, created: new Date().toISOString() });
+      localStorage.setItem('ts_orders', JSON.stringify(orders));
+
+      // Clear cart
+      localStorage.removeItem('ts_cart');
+      updateCartCount();
+      sessionStorage.removeItem('ts_upi_paid');
+
+      // Open WhatsApp web / app
+      const encodedMsg = encodeURIComponent(msg);
+      const waUrl = `https://wa.me/${OWNER_WHATSAPP}?text=${encodedMsg}`;
+      window.open(waUrl, '_blank');
+
+      alert('WhatsApp opened to send the bill. After sending, you will return to home.');
+      setTimeout(()=>{ showSection('home'); renderShop(); }, 900);
+    });
+
+    /********* INIT *********/
+    (function init(){
+      renderShop();
+      updateCartCount();
+      showSection('home');
+      localStorage.setItem('ts_products_example', JSON.stringify(PRODUCTS)); // optional
+    })();
+
+    // expose functions used inline
+    window.addToCart = addToCart;
+    window.showSection = showSection;
+    window.scrollToProducts = scrollToProducts;
+    window.clearCart = clearCart;
+    window.proceedToCheckout = proceedToCheckout;
+    window.openProduct = openProduct;
+    window.buyNow = buyNow;
+  </script>
+</body>
+</html>
